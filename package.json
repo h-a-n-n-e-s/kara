@@ -1,7 +1,7 @@
 {
   "name": "kara",
   "main": "./lib/kara",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Kara!",
   "keywords": [],
   "activationCommands": {
