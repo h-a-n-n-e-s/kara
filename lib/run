@@ -1,0 +1,107 @@
+#!/bin/bash
+if [ "$1" = "cancelPovray" ]; then # cancel povray or fortran --------------------------------------
+  kill $(ps -ef | grep '[P]ovray37UnofficialMacCmd' | awk '{print $2; exit}')
+  exit
+elif [ "$1" = "cancelFortran" ]; then
+  kill $(ps -ef | grep '[g]o' | awk '{print $2; exit}')
+  exit
+elif [ "${1:${#1}-2:2}" = "gp" ]; then # gnuplot ---------------------------------------------------
+  gnuplot $1
+elif [ "${1:${#1}-2:2}" = "sh" ]; then # bash script -----------------------------------------------
+  /bin/bash $1
+elif [ "$1" = "Makefile" ]; then # fortran ---------------------------------------------------------
+  make new
+elif [ "${1:${#1}-5:5}" = "f90go" ]; then # execute go
+  if [ -f "go" ]; then
+    ./go
+  elif [ -f "../go" ]; then
+    cd ..
+    ./go
+  fi
+elif [ "${1:${#1}-3:3}" = "f90" ]; then
+  if [ -f "../Makefile" ]; then
+    cd ..
+    make
+  elif [ "$(head -c 1 $1)" = "!" ]; then
+    echo "Compiling with optimization..."
+    ifort -O3 $1 -ip -Wl,-stack_addr,0xF10000000 -Wl,-stack_size,0x64000000 -o go
+  else
+    echo "Compiling in debug mode..."
+    ifort \
+      -g -O0 -warn errors -diag-error remark -warn all -check all -stand f08 \
+      -fpe0 -ftz -fp-stack-check -traceback -ftrapuv -debug-parameters all $1 \
+      -ip -Wl,-stack_addr,0xF10000000 -Wl,-stack_size,0x64000000 -o go
+  fi
+# povray -------------------------------------------------------------------------------------------
+elif [ "${1:${#1}-3:3}" = "pov" ] || \
+     [ "${1:${#1}-3:3}" = "inc" ] || \
+     [ "${1:${#1}-3:3}" = "ini" ]; then
+  f=${1::${#1}-4} # delete either .pov or .inc or .ini from the filename
+  IFS=
+  delim=
+  let blaBlaDone=0
+  let rendering=0
+  let animation=0
+  let error=0
+  let i=2
+  /Applications/PovrayCommandLineMacV2/Povray37UnofficialMacCmd $f.ini +I$f.pov 2>&1 |
+  while read $delim line; do
+    if [ "${line:0:6}" = "Parser" ] && [ "$blaBlaDone" -eq 0 ]; then
+      blaBlaDone=1
+    fi
+    if [ "$blaBlaDone" -eq 1 ]; then
+      if [ "$rendering" -eq 0 ] && [ "$animation" -eq 0 ]; then
+        if [ "${line:0:1}" = ")" ]; then # catch closing bracket from rendering
+          echo ""
+        else
+          if [[ "$line" = *"Parse Error"* ]] || [[ "$line" = *"Parse Warning"* ]]; then
+            let error=1
+          fi
+          if [[ "$line" = *"Parser Statistics"* ]]; then # escape stderr if only warning
+            let error=0
+          fi
+          if [ "$error" -eq 0 ]; then
+            echo $line # main normal output
+          else
+            echo $line >&2
+          fi
+        fi
+      elif [ "$rendering" -eq 1 ]; then # rendering progress bar output -----------
+        if [ "${line:${#line}-2:1}" = "(" ]; then
+          let j="${line:${#line}-1:1}"
+        elif [ "${line:${#line}-3:1}" = "(" ]; then
+          let j="${line:${#line}-2:2}"
+        else
+          let j=100
+        fi
+        while [ "$i" -le "$j" ]; do
+          echo -n "|"
+          let i=i+2
+        done
+      fi
+      if [ "${line:0:19}" = "==== [Rendering...]" ] && [ "$animation" -eq 0 ]; then
+        delim="-d%"
+        let rendering=1
+        echo "__________________________________________________"
+        echo "|  10%  20%  30%  40%  50%  60%  70%  80%  90%   |"
+      fi
+      if [ "${line:${#line}-3:3}" = "100" ] && [ "$animation" -eq 0 ]; then
+        delim=
+        let rendering=0
+      fi
+      if [ "${line:0:15}" = "Rendering frame" ]; then # animation output ----------
+        if [ "${line:16:2}" = "2 " ]; then
+          let animation=1
+        else
+          echo "$line" # frame number output only
+        fi
+      fi #-------------------------------------------------------------------------
+    fi
+    if [[ "$line" = *"POV-Ray finished"* ]] && [ "$animation" -eq 0 ]; then
+      open /Applications/Preview.app
+      exit
+    fi
+  done
+else
+  echo "I don't know what to do with "$1  >&2
+fi

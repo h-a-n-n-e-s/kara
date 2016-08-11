@@ -3,10 +3,8 @@
   "main": "./lib/kara",
   "version": "0.1.1",
   "description": "Kara!",
-  "keywords": [],
-  "activationCommands": {
-    "atom-workspace": "kara:toggle"
-  },
+  "keywords": ["shell","command","output","povray"],
+  "activationCommands": {},
   "repository": "https://github.com/h-a-n-n-e-s/kara",
   "license": "MIT",
   "engines": {

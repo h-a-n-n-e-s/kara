@@ -1,8 +1,36 @@
-// The ui-variables file is provided by base themes provided by Atom.
-//
-// See https://github.com/atom/atom-dark-ui/blob/master/styles/ui-variables.less
-// for a full listing of what's available.
-@import "ui-variables";
+atom-pane-axis.horizontal .kara {
+  max-width: 550px;
+}
 
 .kara {
+  .body {
+    position: absolute;
+    top: 0px;
+    overflow: auto;
+    border-left: 5px solid #666;
+    background: black;
+    @media ( max-resolution: 120dpi ) { -webkit-font-smoothing: none }
+    .native-key-bindings { // this class provides copyable text
+      .stdout, .stderr, .render, .output {
+        font-family: Monaco;
+        font-size: 10px;
+        line-height: 15px;
+        border-radius: 0px;
+        white-space: pre-wrap; // line wrap
+      }
+      .stdout, .stderr, .render {
+        background: black;
+        padding: 0px;
+        padding-left: 9px;
+      }
+      .stdout { color: white }
+      .stderr { color: red   }
+      .render { color: #0ff  }
+      .output {
+        color: #0ff;
+        background: #222;
+        padding: 9px;
+      }
+    }
+  }
 }
