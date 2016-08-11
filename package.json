@@ -1,9 +1,14 @@
 {
   "name": "kara",
   "main": "./lib/kara",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Kara!",
-  "keywords": ["shell","command","output","povray"],
+  "keywords": [
+    "shell",
+    "command",
+    "output",
+    "povray"
+  ],
   "activationCommands": {},
   "repository": "https://github.com/h-a-n-n-e-s/kara",
   "license": "MIT",
