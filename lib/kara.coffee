@@ -5,7 +5,7 @@ module.exports = Kara =
   activate: () ->
     
     atom.commands.add 'atom-workspace', 'kara:run': => @run('')
-    atom.commands.add 'atom-workspace', 'kara:go': => @run('go')
+    atom.commands.add 'atom-workspace', 'kara:go': => @run('fo')
     atom.commands.add 'atom-workspace', 'kara:cancel': => @cancel()
   
   

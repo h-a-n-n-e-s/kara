@@ -11,7 +11,7 @@ elif [ "${1:${#1}-2:2}" = "sh" ]; then # bash script ---------------------------
   /bin/bash $1
 elif [ "$1" = "Makefile" ]; then # fortran ---------------------------------------------------------
   make new
-elif [ "${1:${#1}-5:5}" = "f90go" ]; then # execute go
+elif [ "${1:${#1}-5:5}" = "f90fo" ]; then # execute go
   if [ -f "go" ]; then
     ./go
   elif [ -f "../go" ]; then
