@@ -26,64 +26,66 @@ module.exports = Kara =
     currentPane = atom.workspace.getActivePane()
     currentPane.saveItems()
     
-    # create new pane 'karaPane' and attach a view -------------------------------------------------
-    karaPane = currentPane.splitRight()
-    atom.workspace.activatePreviousPane() # bring focus back to editor
-    karaPaneElement = atom.views.getView(karaPane)
-    karaPaneElement.classList.add('kara')
-    bob = document.createElement('body')
-    bob.classList.add('body')
-    karaPaneElement.appendChild(bob)
-    div = document.createElement('div')
-    div.classList.add('native-key-bindings')
-    div.tabIndex = -1 # this together with the native-key-bindings class allows for copyable text
-    bob.appendChild(div)
-    
-    # preparation for rendering progress bar output from Povray ------------------------------------
-    rendering = false
-    buffer = ''
-    render = document.createElement('pre')
-    render.classList.add('render')
-    
-    # add text with class 'tag' to div -------------------------------------------------------------
-    appendPre = (tag, text) ->
-      message = document.createElement('pre')
-      message.classList.add(tag)
-      message.textContent = text
-      div.appendChild(message)
-      message.scrollHeight
-    
-    # scroll behavior: only scroll down to show new text if currently scrolled to bottom -----------
-    overflow = false
-    scrollChecker = (height) ->
-      overlap = bob.scrollHeight - karaPaneElement.scrollHeight
-      if overflow and overlap - bob.scrollTop is height # true if currently scrolled to bottom
-        bob.scrollTop = overlap
-      if not overflow and overlap > 0 # initial scroll when text hits bottom the first time
-        overflow = true
-        bob.scrollTop = overlap
-    
-    # output ---------------------------------------------------------------------------------------
-    if path.match('com~apple~CloudDocs') # cut lengthy iCloud path name
-      path = '--iCloud--'+path.substr(path.lastIndexOf('com~apple~CloudDocs')+19,path.length)
-    if goSwitch is ''
-      appendPre('output', 'file:  '+path)
-    else
-      appendPre('output', 'go:  '+path)
-    stdout = (out) -> # called if karaProcess writes to stdout
-      if not rendering and out.substr(0,5) isnt '|||||'
-        outHeight = appendPre('stdout', out)
+    if suffix not in ['html','css','svg','js'] # only open pane if there is something to display
+      
+      # create new pane 'karaPane' and attach a view -----------------------------------------------
+      karaPane = currentPane.splitRight()
+      atom.workspace.activatePreviousPane() # bring focus back to editor
+      karaPaneElement = atom.views.getView(karaPane)
+      karaPaneElement.classList.add('kara')
+      bob = document.createElement('body')
+      bob.classList.add('body')
+      karaPaneElement.appendChild(bob)
+      div = document.createElement('div')
+      div.classList.add('native-key-bindings')
+      div.tabIndex = -1 # this together with the native-key-bindings class allows for copyable text
+      bob.appendChild(div)
+      
+      # preparation for rendering progress bar output from Povray ----------------------------------
+      rendering = false
+      buffer = ''
+      render = document.createElement('pre')
+      render.classList.add('render')
+      
+      # add text with class 'tag' to div -----------------------------------------------------------
+      appendPre = (tag, text) ->
+        message = document.createElement('pre')
+        message.classList.add(tag)
+        message.textContent = text
+        div.appendChild(message)
+        message.scrollHeight
+      
+      # scroll behavior: only scroll down to show new text if currently scrolled to bottom ---------
+      overflow = false
+      scrollChecker = (height) ->
+        overlap = bob.scrollHeight - karaPaneElement.scrollHeight
+        if overflow and overlap - bob.scrollTop is height # true if currently scrolled to bottom
+          bob.scrollTop = overlap
+        if not overflow and overlap > 0 # initial scroll when text hits bottom the first time
+          overflow = true
+          bob.scrollTop = overlap
+      
+      # output -------------------------------------------------------------------------------------
+      if path.match('com~apple~CloudDocs') # cut lengthy iCloud path name
+        path = '--iCloud--'+path.substr(path.lastIndexOf('com~apple~CloudDocs')+19,path.length)
+      if goSwitch is ''
+        appendPre('output', 'file:  '+path)
+      else
+        appendPre('output', 'go:  '+path)
+      stdout = (out) -> # called if karaProcess writes to stdout
+        if not rendering and out.substr(0,5) isnt '|||||'
+          outHeight = appendPre('stdout', out)
+          scrollChecker(outHeight)
+        # check if rendering progress bar output from Povray started
+        if suffix in ['pov','inc','ini'] and out.substr(out.length-8,7) is '90%   |'
+          rendering = true
+          div.appendChild(render)
+      stderr = (out) -> # called if karaProcess writes to stderr
+        outHeight = appendPre('stderr', out)
         scrollChecker(outHeight)
-      # check if rendering progress bar output from Povray started
-      if suffix in ['pov','inc','ini'] and out.substr(out.length-8,7) is '90%   |'
-        rendering = true
-        div.appendChild(render)
-    stderr = (out) -> # called if karaProcess writes to stderr
-      outHeight = appendPre('stderr', out)
-      scrollChecker(outHeight)
-    exit = (code) ->
-      outHeight = appendPre('output', 'Process finished with exit status '+code+'.')
-      scrollChecker(outHeight)
+      exit = (code) ->
+        outHeight = appendPre('output', 'Process finished with exit status '+code+'.')
+        scrollChecker(outHeight)
     
     # run the karaProcess --------------------------------------------------------------------------
     command = __dirname+'/run' # absolute path is necessary since we'll change cwd
