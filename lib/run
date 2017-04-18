@@ -1,21 +1,29 @@
 #!/bin/bash
-if [ "$1" = "cancelPovray" ]; then # cancel povray or fortran --------------------------------------
+# cancel povray or fortran -------------------------------------------------------------------------
+if [ "$1" = "cancelPovray" ]; then
   kill $(ps -ef | grep '[P]ovray37UnofficialMacCmd' | awk '{print $2; exit}')
   exit
 elif [ "$1" = "cancelFortran" ]; then
   kill $(ps -ef | grep '[g]o' | awk '{print $2; exit}')
   exit
-elif [ "${1:${#1}-2:2}" = "gp" ]; then # gnuplot ---------------------------------------------------
+# gnuplot ------------------------------------------------------------------------------------------
+elif [ "${1:${#1}-2:2}" = "gp" ]; then
   gnuplot $1
-elif [ "${1:${#1}-2:2}" = "sh" ]; then # bash script -----------------------------------------------
+# bash script --------------------------------------------------------------------------------------
+elif [ "${1:${#1}-2:2}" = "sh" ]; then
   /bin/bash $1
+# web stuff ----------------------------------------------------------------------------------------
 elif [ "${1:${#1}-4:4}" = "html" ] || \
      [ "${1:${#1}-3:3}" = "css"  ] || \
      [ "${1:${#1}-3:3}" = "svg"  ] || \
-     [ "${1:${#1}-2:2}" = "js"   ]; then # web stuff -----------------------------------------------
-  osascript -e 'tell application "Safari" to set latest to URL of document 1
-  tell application "Safari" to set URL of document 1 to latest'
-elif [ "$1" = "Makefile" ]; then # fortran ---------------------------------------------------------
+     [ "${1:${#1}-2:2}" = "js"   ]; then
+  osascript -e '
+  tell application "Safari" to activate
+  tell application "System Events" to keystroke "r" using command down
+  tell application "Atom" to activate
+  '
+# fortran ------------------------------------------------------------------------------------------
+elif [ "$1" = "Makefile" ]; then
   make new
 elif [ "${1:${#1}-5:5}" = "f90fo" ]; then # execute go
   if [ -f "go" ]; then
