@@ -1,7 +1,7 @@
 {
   "name": "kara",
   "main": "./lib/kara",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Kara!",
   "keywords": [
     "shell",
