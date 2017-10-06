@@ -24,6 +24,7 @@ elif [ "${1:${#1}-4:4}" = "html" ] || \
   '
 # fortran ------------------------------------------------------------------------------------------
 elif [ "$1" = "Makefile" ]; then
+  sleep .5 # ugly patch because of Atom's new asyncronous TextBuffer.save crap
   make new
 elif [ "${1:${#1}-5:5}" = "f90fo" ]; then # execute go
   if [ -f "go" ]; then
@@ -33,6 +34,7 @@ elif [ "${1:${#1}-5:5}" = "f90fo" ]; then # execute go
     ./go
   fi
 elif [ "${1:${#1}-3:3}" = "f90" ]; then
+  sleep .5 # ugly patch because of Atom's new asyncronous TextBuffer.save crap
   if [ -f "../Makefile" ]; then
     cd ..
     make

@@ -25,6 +25,8 @@ module.exports = Kara =
       pane.destroy() if atom.views.getView(pane).className is 'pane kara'
     currentPane = atom.workspace.getActivePane()
     currentPane.saveItems()
+    # for item in currentPane.getItems()
+    #   await currentPane.saveItem(item) # await doesn't work yet in Coffeeshit
     
     if suffix not in ['html','css','svg','js'] # only open pane if there is something to display
       
